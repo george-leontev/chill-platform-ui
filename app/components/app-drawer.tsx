@@ -4,17 +4,21 @@ import { Avatar, Divider } from "antd";
 import Sider from "antd/es/layout/Sider";
 import { Home, MessageCircle, FileText, Heart, User, LifeBuoy } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const navItems = [
-    { label: "Home", icon: Home },
-    { label: "Chats", icon: MessageCircle },
-    { label: "My Posts", icon: FileText },
-    { label: "Liked", icon: Heart },
-    { label: "Profile", icon: User },
-    { label: "Help & Support", icon: LifeBuoy },
+    { label: "Home", icon: Home, href: "/home" },
+    { label: "Chats", icon: MessageCircle, href: "/chats" },
+    { label: "My Posts", icon: FileText, href: "/my-posts" },
+    { label: "Liked", icon: Heart, href: "/liked" },
+    { label: "Profile", icon: User, href: "/profile" },
+    { label: "Help & Support", icon: LifeBuoy, href: "/help" },
 ];
 
 export default function AppDrawer() {
+    const pathname = usePathname();
+
     return (
         <Sider width={290} theme='light' className='min-h-screen border-r border-gray-100 flex flex-col'>
             <div className='flex flex-col h-full'>
@@ -28,25 +32,28 @@ export default function AppDrawer() {
                 <div className='flex-1 p-3 overflow-y-auto'>
                     {navItems.map((item, i) => {
                         const Icon = item.icon;
+                        const isActive = pathname === item.href;
 
                         return (
-                            <button
-                                key={i}
-                                className='
+                            <Link key={i} href={item.href}>
+                                <div
+                                    className={`
                                         w-full flex items-center gap-3
                                         cursor-pointer
                                         px-4 py-3 rounded-lg
-                                        text-gray-700
                                         transition
-                                        hover:bg-gray-100
-                                        hover:text-violet-600
                                         group
-                                    '
-                            >
-                                <Icon size={20} className='text-gray-500 group-hover:text-violet-600' />
+                                        ${isActive
+                                            ? "bg-violet-50 text-violet-600"
+                                            : "text-gray-700 hover:bg-gray-100 hover:text-violet-600"
+                                        }
+                                    `}
+                                >
+                                    <Icon size={20} className={isActive ? "text-violet-600" : "text-gray-500 group-hover:text-violet-600"} />
 
-                                <span className='font-medium'>{item.label}</span>
-                            </button>
+                                    <span className='font-medium'>{item.label}</span>
+                                </div>
+                            </Link>
                         );
                     })}
 

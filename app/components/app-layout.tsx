@@ -1,28 +1,30 @@
 "use client";
 
-import { Layout, Avatar, Divider } from "antd";
-import { Home, MessageCircle, FileText, Heart, User, LifeBuoy } from "lucide-react";
-import Image from "next/image";
+import { Layout } from "antd";
+import { usePathname } from "next/navigation";
 import AppDrawer from "./app-drawer";
 
-const { Sider, Content } = Layout;
-
-const navItems = [
-    { label: "Home", icon: Home },
-    { label: "Chats", icon: MessageCircle },
-    { label: "My Posts", icon: FileText },
-    { label: "Liked", icon: Heart },
-    { label: "Profile", icon: User },
-    { label: "Help & Support", icon: LifeBuoy },
-];
+const { Content } = Layout;
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname();
+
+    const hideDrawer = pathname === "/sign-in" || pathname === "/sign-up";
+
     return (
         <Layout className='min-h-screen bg-gray-50'>
-            <AppDrawer />
+            {!hideDrawer && <AppDrawer />}
 
             <Layout>
-                <Content className='p-6'>{children}</Content>
+                <Content
+                    className={
+                        hideDrawer
+                            ? "flex items-center justify-center min-h-screen bg-gray-50"
+                            : "p-6 min-h-screen bg-gray-50"
+                    }
+                >
+                    {children}
+                </Content>
             </Layout>
         </Layout>
     );
