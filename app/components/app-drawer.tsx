@@ -20,8 +20,12 @@ export default function AppDrawer() {
     const pathname = usePathname();
 
     return (
-        <Sider width={290} theme='light' className='min-h-screen border-r border-gray-100 flex flex-col'>
-            <div className='flex flex-col h-full'>
+        <Sider
+            width={290}
+            theme='light'
+            className='!fixed top-0 left-0 h-screen border-r border-gray-100 z-50'
+        >
+            <div className='flex flex-col h-full overflow-y-auto'>
                 {/* HEADER */}
                 <div className='flex items-center gap-6 px-6 py-5 border-b border-gray-100'>
                     <Image src={"/chill-guy.png"} width={36} height={36} alt='chill-guy' />
@@ -29,7 +33,7 @@ export default function AppDrawer() {
                 </div>
 
                 {/* NAVIGATION */}
-                <div className='flex-1 p-3 overflow-y-auto'>
+                <div className='flex-1 p-3'>
                     {navItems.map((item, i) => {
                         const Icon = item.icon;
                         const isActive = pathname === item.href;
@@ -61,7 +65,7 @@ export default function AppDrawer() {
                 </div>
 
                 {/* PROFILE */}
-                <div className='border-t border-gray-100 p-4 bg-violet-50/40'>
+                <div className='border-t border-gray-100 p-4 bg-violet-50/40 flex-shrink-0'>
                     <div className='flex items-center gap-3'>
                         <Avatar size={44} src='https://i.pravatar.cc/100' className='ring-2 ring-violet-500' />
 

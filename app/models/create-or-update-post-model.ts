@@ -3,5 +3,5 @@ export type CreateOrUpdatePostModel = {
 
     content: string;
 
-    images: string[]
+    images: string[];
 };

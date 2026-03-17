@@ -1,4 +1,5 @@
 import { PostAuthorModel } from "./post-author-model";
+import { PostImageModel } from "./post-image-model";
 
 export type PostsModel = {
     id: number;
@@ -9,7 +10,7 @@ export type PostsModel = {
 
     createdAt: string;
 
-    images?: string[];
+    images?: PostImageModel[];
 
     author: PostAuthorModel;
 };

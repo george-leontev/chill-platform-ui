@@ -31,7 +31,7 @@ export function PostsProvider({ children }: { children: ReactNode }) {
 
             if (response && response.data && response.status == HttpConstants.StatusCodes.Ok) {
                 const posts = response.data.items as PostsModel[];
-                await new Promise((resolve) => setTimeout(resolve, 2000));
+                console.log(posts);
 
                 return posts;
             }
@@ -87,8 +87,6 @@ export function PostsProvider({ children }: { children: ReactNode }) {
                     }
 
                     setPosts((prev) => [createdPost, ...prev]);
-
-                    await new Promise((resolve) => setTimeout(resolve, 600));
 
                     return createdPost;
                 }

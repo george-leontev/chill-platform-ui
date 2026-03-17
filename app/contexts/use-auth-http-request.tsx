@@ -49,7 +49,7 @@ export const useAuthHttpRequest = () => {
                     if (!suppressShowUnauthorized) {
                         proclaim({
                             type: "error",
-                            message: response.data.message,
+                            title: response.data.message,
                             // displayTime: 30000000,
                         });
                     }

@@ -2,9 +2,10 @@
 
 import { Avatar, Input, Upload } from "antd";
 import type { UploadFile, UploadProps } from "antd";
-import { ImagePlus, Smile, Loader2, X, Send } from "lucide-react";
+import { ImagePlus, Smile, Loader2, X } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
+import EmojiPicker from "./emoji-picker";
 
 const { TextArea } = Input;
 
@@ -13,7 +14,16 @@ interface CreatePostFormProps {
     isPosting: boolean;
 }
 
-const emojis = ["😀", "😂", "😍", "🥰", "😊", "😎", "🤔", "👍", "❤️", "🔥", "🎉", "✨", "💯", "🙌", "👏", "🤝"];
+const MAX_IMAGES = 8;
+
+const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+};
 
 export default function CreatePostForm({ onSubmit, isPosting }: CreatePostFormProps) {
     const [postContent, setPostContent] = useState("");
@@ -21,20 +31,26 @@ export default function CreatePostForm({ onSubmit, isPosting }: CreatePostFormPr
     const [previewUrls, setPreviewUrls] = useState<string[]>([]);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-    const handleUploadChange: UploadProps["onChange"] = ({ fileList: newFileList }) => {
-        const filtered = newFileList.filter((file) => {
-            const isImage = file.type?.startsWith("image/");
-            const isUnder5MB = (file.size ?? 0) / 1024 / 1024 < 5;
-            return isImage && isUnder5MB;
-        });
+    const handleUploadChange: UploadProps["onChange"] = async ({ fileList: newFileList }) => {
+        const filtered = newFileList
+            .filter((file) => {
+                const isImage = file.type?.startsWith("image/");
+                const isUnder5MB = (file.size ?? 0) / 1024 / 1024 < 5;
+                return isImage && isUnder5MB;
+            })
+            .slice(0, MAX_IMAGES);
 
         setFileList(filtered);
 
-        const urls = filtered.map((file) => {
-            if (file.url) return file.url;
-            if (file.originFileObj) return URL.createObjectURL(file.originFileObj);
-            return "";
-        });
+        const urls = await Promise.all(
+            filtered.map(async (file) => {
+                if (file.url && file.url.startsWith("data:")) return file.url;
+                if (file.originFileObj) {
+                    return await fileToBase64(file.originFileObj);
+                }
+                return "";
+            }),
+        );
         setPreviewUrls(urls.filter(Boolean));
     };
 
@@ -47,7 +63,6 @@ export default function CreatePostForm({ onSubmit, isPosting }: CreatePostFormPr
 
     const insertEmoji = (emoji: string) => {
         setPostContent((prev) => prev + emoji);
-        setShowEmojiPicker(false);
     };
 
     const handleSubmit = async () => {
@@ -81,12 +96,7 @@ export default function CreatePostForm({ onSubmit, isPosting }: CreatePostFormPr
                                     key={index}
                                     className='relative group w-24 h-24 rounded-xl overflow-hidden border border-gray-200'
                                 >
-                                    <Image
-                                        src={url}
-                                        alt={`attachment-${index}`}
-                                        fill
-                                        className='object-cover'
-                                    />
+                                    <Image src={url} alt={`attachment-${index}`} fill className='object-cover' />
                                     <button
                                         onClick={() => removeImage(index)}
                                         className='
@@ -115,10 +125,10 @@ export default function CreatePostForm({ onSubmit, isPosting }: CreatePostFormPr
                             beforeUpload={() => false}
                             fileList={fileList}
                             onChange={handleUploadChange}
-                            disabled={isPosting}
+                            disabled={isPosting || fileList.length >= MAX_IMAGES}
                         >
                             <button
-                                disabled={isPosting}
+                                disabled={isPosting || fileList.length >= MAX_IMAGES}
                                 className='
                                     flex items-center justify-center
                                     w-9 h-9 rounded-lg
@@ -128,13 +138,18 @@ export default function CreatePostForm({ onSubmit, isPosting }: CreatePostFormPr
                                     transition
                                     disabled:opacity-50
                                     disabled:cursor-not-allowed
+                                    cursor-pointer
                                 '
-                                title='Attach images'
+                                title={
+                                    fileList.length >= MAX_IMAGES
+                                        ? `Maximum ${MAX_IMAGES} images allowed`
+                                        : "Attach images"
+                                }
                             >
                                 <ImagePlus size={18} />
                                 {fileList.length > 0 && (
                                     <span className='ml-1 text-xs font-medium text-violet-600'>
-                                        {fileList.length}
+                                        {fileList.length}/{MAX_IMAGES}
                                     </span>
                                 )}
                             </button>
@@ -154,6 +169,7 @@ export default function CreatePostForm({ onSubmit, isPosting }: CreatePostFormPr
                                     transition
                                     disabled:opacity-50
                                     disabled:cursor-not-allowed
+                                    cursor-pointer
                                 '
                                 title='Add emoji'
                             >
@@ -161,31 +177,7 @@ export default function CreatePostForm({ onSubmit, isPosting }: CreatePostFormPr
                             </button>
 
                             {showEmojiPicker && (
-                                <div
-                                    className='
-                                        absolute bottom-full right-0 mb-2
-                                        bg-white border border-gray-200 rounded-xl shadow-lg
-                                        p-3 z-10
-                                    '
-                                >
-                                    <div className='grid grid-cols-4 gap-2'>
-                                        {emojis.map((emoji) => (
-                                            <button
-                                                key={emoji}
-                                                onClick={() => insertEmoji(emoji)}
-                                                className='
-                                                    w-8 h-8
-                                                    flex items-center justify-center
-                                                    text-xl
-                                                    hover:bg-gray-100 rounded
-                                                    transition
-                                                '
-                                            >
-                                                {emoji}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
+                                <EmojiPicker onSelect={insertEmoji} onClose={() => setShowEmojiPicker(false)} />
                             )}
                         </div>
 
@@ -206,16 +198,10 @@ export default function CreatePostForm({ onSubmit, isPosting }: CreatePostFormPr
                                 disabled:opacity-50
                                 disabled:cursor-not-allowed
                                 disabled:hover:bg-violet-600
+                                cursor-pointer
                             '
                         >
-                            {isPosting ? (
-                                <>
-                                    <Loader2 className='w-4 h-4 animate-spin' />
-                                    <span>Posting...</span>
-                                </>
-                            ) : (
-                                "Post"
-                            )}
+                            Post
                         </button>
                     </div>
                 </div>

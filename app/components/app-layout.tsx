@@ -14,8 +14,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return (
         <Layout className='min-h-screen bg-gray-50'>
             {!hideDrawer && <AppDrawer />}
-
-            <Layout>
+            <Layout className={`bg-gray-50 ${!hideDrawer ? "ml-72.5" : ""}`}>
+                {" "}
+                {/* ← add bg-gray-50 */}
                 <Content
                     className={
                         hideDrawer

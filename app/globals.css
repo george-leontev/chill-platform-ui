@@ -20,7 +20,19 @@
 }
 
 body {
-  background: var(--background);
+  /* background: var(--background); */
+  background-color: #f9fafb;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.ant-image {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.ant-image-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
 }
