@@ -14,6 +14,7 @@ type NewsContextType = {
     getPostByIdAsync: (id: number) => Promise<PostsModel | undefined>;
     createPostAsync: (post: CreateOrUpdatePostModel) => Promise<PostsModel | undefined>;
     getMyPostsAsync: () => Promise<PostsModel[] | undefined>;
+    getLikedPostsAsync: () => Promise<PostsModel[] | undefined>;
     toggleLikeAsync: (postId: number) => Promise<PostLikeResponseModel | undefined>;
 };
 
@@ -142,6 +143,26 @@ export function PostsProvider({ children }: { children: ReactNode }) {
         [authHttpRequest],
     );
 
+    const getLikedPostsAsync = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const response = await authHttpRequest({
+                method: "GET",
+                url: `${routes.likedPosts}`,
+            });
+
+            if (response && response.data && response.status == HttpConstants.StatusCodes.Ok) {
+                const posts = response.data.items as PostsModel[];
+
+                return posts;
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [authHttpRequest]);
+
     useEffect(() => {
         (async () => {
             const posts = await getAllPostsAsync();
@@ -154,7 +175,7 @@ export function PostsProvider({ children }: { children: ReactNode }) {
 
     return (
         <NewsContext.Provider
-            value={{ posts, isLoading, getPostByIdAsync, createPostAsync, getMyPostsAsync, toggleLikeAsync }}
+            value={{ posts, isLoading, getPostByIdAsync, createPostAsync, getMyPostsAsync, getLikedPostsAsync, toggleLikeAsync }}
         >
             {children}
         </NewsContext.Provider>

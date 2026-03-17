@@ -2,7 +2,7 @@
 
 import { usePosts } from "../../contexts/posts-data-context";
 import { PostsModel } from "../../models/posts-model";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import PostCard from "../../components/post-card";
 
 export default function MyPostsPage() {
@@ -19,6 +19,10 @@ export default function MyPostsPage() {
         };
         fetchMyPosts();
     }, [getMyPostsAsync]);
+
+    const totalLikes = useMemo(() => {
+        return myPosts.reduce((sum, post) => sum + (post.likesCount || 0), 0);
+    }, [myPosts]);
 
     if (isLoading && myPosts.length === 0) {
         return (
@@ -37,18 +41,14 @@ export default function MyPostsPage() {
                 </div>
 
                 {/* Stats */}
-                <div className='grid grid-cols-3 gap-4 mb-6'>
+                <div className='grid grid-cols-2 gap-4 mb-6'>
                     <div className='bg-white border border-gray-100 rounded-2xl p-4 text-center'>
                         <p className='text-2xl font-bold text-violet-600'>{myPosts.length}</p>
                         <p className='text-sm text-gray-500'>Total Posts</p>
                     </div>
                     <div className='bg-white border border-gray-100 rounded-2xl p-4 text-center'>
-                        <p className='text-2xl font-bold text-violet-600'>0</p>
+                        <p className='text-2xl font-bold text-violet-600'>{totalLikes}</p>
                         <p className='text-sm text-gray-500'>Total Likes</p>
-                    </div>
-                    <div className='bg-white border border-gray-100 rounded-2xl p-4 text-center'>
-                        <p className='text-2xl font-bold text-violet-600'>0</p>
-                        <p className='text-sm text-gray-500'>Comments</p>
                     </div>
                 </div>
 

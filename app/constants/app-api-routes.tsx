@@ -9,6 +9,7 @@ export const routes = {
     verification: "/verification",
     posts: "/api/posts",
     myPosts: "/api/posts/my",
+    likedPosts: "/api/posts/liked",
 };
 
 export const postRoutes = {

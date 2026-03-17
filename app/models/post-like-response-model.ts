@@ -4,4 +4,6 @@ export type PostLikeResponseModel = {
     postId: number;
 
     liked: boolean;
+
+    likeCount: number;
 };

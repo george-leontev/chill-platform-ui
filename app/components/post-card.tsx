@@ -66,7 +66,7 @@ const PostCard = ({ post, initialIsLiked = false }: PostCardProps) => {
                     <p className='text-gray-700 mt-3'>{post.content}</p>
 
                     <div className='flex items-center gap-6 mt-4'>
-                        <LikeButton postId={post.id} initialIsLiked={initialIsLiked} />
+                        <LikeButton postId={post.id} initialIsLiked={initialIsLiked} likeCount={post.likesCount} />
                         <ShareButton postId={post.id} content={post.content} />
                     </div>
                 </div>

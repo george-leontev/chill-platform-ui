@@ -11,9 +11,10 @@ interface LikeButtonProps {
     likeCount?: number;
 }
 
-export default function LikeButton({ postId, initialIsLiked = false, likeCount }: LikeButtonProps) {
+export default function LikeButton({ postId, initialIsLiked = false, likeCount: initialLikeCount }: LikeButtonProps) {
     const { toggleLikeAsync } = usePosts();
     const [isLiked, setIsLiked] = useState(initialIsLiked);
+    const [likeCount, setLikeCount] = useState(initialLikeCount || 0);
     const [showParticles, setShowParticles] = useState(false);
 
     const handleLike = async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -21,7 +22,10 @@ export default function LikeButton({ postId, initialIsLiked = false, likeCount }
         e.stopPropagation();
 
         const wasLiked = isLiked;
+        
+        // Optimistically update UI
         setIsLiked(!wasLiked);
+        setLikeCount(prev => wasLiked ? prev - 1 : prev + 1);
 
         if (!wasLiked) {
             setShowParticles(true);
@@ -31,6 +35,9 @@ export default function LikeButton({ postId, initialIsLiked = false, likeCount }
         const result = await toggleLikeAsync(postId);
         if (result) {
             setIsLiked(result.liked);
+            if (result.likeCount !== undefined) {
+                setLikeCount(result.likeCount);
+            }
         }
     };
 
@@ -85,38 +92,16 @@ export default function LikeButton({ postId, initialIsLiked = false, likeCount }
                 <ThumbsUp size={18} fill={isLiked ? "currentColor" : "none"} />
             </motion.div>
 
-            <AnimatePresence mode='wait'>
-                {isLiked ? (
-                    <motion.span
-                        key='liked'
-                        initial={{ opacity: 0, scale: 0.5, x: -5 }}
-                        animate={{ opacity: 1, scale: 1, x: 0 }}
-                        exit={{ opacity: 0, scale: 0.5, x: -5 }}
-                        transition={{ duration: 0.2 }}
-                        className='text-violet-600 font-medium'
-                    >
-                        Liked!
-                    </motion.span>
-                ) : likeCount !== undefined ? (
-                    <motion.span
-                        key='count'
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                    >
-                        {likeCount}
-                    </motion.span>
-                ) : (
-                    <motion.span
-                        key='like'
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                    >
-                        Like
-                    </motion.span>
-                )}
-            </AnimatePresence>
+            <motion.span
+                key={likeCount}
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                transition={{ duration: 0.2 }}
+                className={isLiked ? 'text-violet-600 font-medium' : ''}
+            >
+                {likeCount}
+            </motion.span>
         </button>
     );
 }
