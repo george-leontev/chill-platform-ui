@@ -80,7 +80,7 @@ export default function CreatePostForm({ onSubmit, isPosting }: CreatePostFormPr
 
                 <div className='flex-1'>
                     <TextArea
-                        placeholder='Share something with Chill Platform...'
+                        placeholder='Share something with ChillZone...'
                         autoSize={{ minRows: 4, maxRows: 8 }}
                         className='text-gray-700 text-base'
                         value={postContent}

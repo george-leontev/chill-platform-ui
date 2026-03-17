@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "Chill Zone",
-    description: "Chill Zone Social Network",
+    title: "ChillZone",
+    description: "ChillZone Social Network",
 };
 
 export default function RootLayout({

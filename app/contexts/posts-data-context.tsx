@@ -3,15 +3,18 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { PostsModel } from "../models/posts-model";
 import { CreateOrUpdatePostModel } from "../models/create-or-update-post-model";
-import { routes } from "../constants/app-api-routes";
+import { routes, postRoutes } from "../constants/app-api-routes";
 import { HttpConstants } from "../constants/app-http-constants";
 import { useAuthHttpRequest } from "./use-auth-http-request";
+import { PostLikeResponseModel } from "../models/post-like-response-model";
 
 type NewsContextType = {
     posts: PostsModel[];
     isLoading: boolean;
     getPostByIdAsync: (id: number) => Promise<PostsModel | undefined>;
     createPostAsync: (post: CreateOrUpdatePostModel) => Promise<PostsModel | undefined>;
+    getMyPostsAsync: () => Promise<PostsModel[] | undefined>;
+    toggleLikeAsync: (postId: number) => Promise<PostLikeResponseModel | undefined>;
 };
 
 const NewsContext = createContext<NewsContextType | undefined>(undefined);
@@ -99,6 +102,46 @@ export function PostsProvider({ children }: { children: ReactNode }) {
         [authHttpRequest],
     );
 
+    const getMyPostsAsync = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const response = await authHttpRequest({
+                method: "GET",
+                url: `${routes.myPosts}`,
+            });
+
+            if (response && response.data && response.status == HttpConstants.StatusCodes.Ok) {
+                const posts = response.data.items as PostsModel[];
+
+                return posts;
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [authHttpRequest]);
+
+    const toggleLikeAsync = useCallback(
+        async (postId: number) => {
+            try {
+                const response = await authHttpRequest({
+                    method: "POST",
+                    url: postRoutes.toggleLike(postId),
+                });
+
+                if (response && response.data && (response.status === HttpConstants.StatusCodes.Ok)) {
+                    const likeResult = response.data as PostLikeResponseModel;
+
+                    return likeResult;
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        },
+        [authHttpRequest],
+    );
+
     useEffect(() => {
         (async () => {
             const posts = await getAllPostsAsync();
@@ -110,7 +153,9 @@ export function PostsProvider({ children }: { children: ReactNode }) {
     }, [getAllPostsAsync]);
 
     return (
-        <NewsContext.Provider value={{ posts, isLoading, getPostByIdAsync, createPostAsync }}>
+        <NewsContext.Provider
+            value={{ posts, isLoading, getPostByIdAsync, createPostAsync, getMyPostsAsync, toggleLikeAsync }}
+        >
             {children}
         </NewsContext.Provider>
     );

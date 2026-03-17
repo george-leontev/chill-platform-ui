@@ -4,8 +4,8 @@ import { Avatar, Divider } from "antd";
 import Sider from "antd/es/layout/Sider";
 import { Home, MessageCircle, FileText, Heart, User, LifeBuoy } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import DrawerNavItem from "./drawer-nav-item";
 
 const navItems = [
     { label: "Home", icon: Home, href: "/home" },
@@ -20,45 +20,19 @@ export default function AppDrawer() {
     const pathname = usePathname();
 
     return (
-        <Sider
-            width={290}
-            theme='light'
-            className='!fixed top-0 left-0 h-screen border-r border-gray-100 z-50'
-        >
+        <Sider width={290} theme='light' className='!fixed top-0 left-0 h-screen border-r border-gray-100 z-50'>
             <div className='flex flex-col h-full overflow-y-auto'>
                 {/* HEADER */}
                 <div className='flex items-center gap-6 px-6 py-5 border-b border-gray-100'>
                     <Image src={"/chill-guy.png"} width={36} height={36} alt='chill-guy' />
-                    <h2 className='text-lg font-semibold text-gray-800'>Chill Platform</h2>
+                    <h2 className='text-lg font-semibold text-gray-800'>ChillZone</h2>
                 </div>
 
                 {/* NAVIGATION */}
-                <div className='flex-1 p-3'>
+                <div className='flex-1 p-3 flex flex-col gap-1'>
                     {navItems.map((item, i) => {
-                        const Icon = item.icon;
                         const isActive = pathname === item.href;
-
-                        return (
-                            <Link key={i} href={item.href}>
-                                <div
-                                    className={`
-                                        w-full flex items-center gap-3
-                                        cursor-pointer
-                                        px-4 py-3 rounded-lg
-                                        transition
-                                        group
-                                        ${isActive
-                                            ? "bg-violet-50 text-violet-600"
-                                            : "text-gray-700 hover:bg-gray-100 hover:text-violet-600"
-                                        }
-                                    `}
-                                >
-                                    <Icon size={20} className={isActive ? "text-violet-600" : "text-gray-500 group-hover:text-violet-600"} />
-
-                                    <span className='font-medium'>{item.label}</span>
-                                </div>
-                            </Link>
-                        );
+                        return <DrawerNavItem key={i} {...item} isActive={isActive} />;
                     })}
 
                     <Divider className='my-4' />

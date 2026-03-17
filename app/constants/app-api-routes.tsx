@@ -8,4 +8,9 @@ export const routes = {
     signUp: "/sign-up",
     verification: "/verification",
     posts: "/api/posts",
+    myPosts: "/api/posts/my",
+};
+
+export const postRoutes = {
+    toggleLike: (postId: number) => `/api/posts/${postId}/like`,
 };

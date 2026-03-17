@@ -10,6 +10,8 @@ export type PostsModel = {
 
     createdAt: string;
 
+    isLiked: boolean;
+
     images?: PostImageModel[];
 
     author: PostAuthorModel;

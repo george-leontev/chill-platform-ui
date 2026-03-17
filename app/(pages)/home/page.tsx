@@ -9,12 +9,7 @@ import { CreateOrUpdatePostModel } from "@/app/models/create-or-update-post-mode
 
 const HomePageInternal = () => {
     const { posts, isLoading, createPostAsync } = usePosts();
-    const [liked, setLiked] = useState<number[]>([]);
     const [isPosting, setIsPosting] = useState(false);
-
-    function toggleLike(id: number) {
-        setLiked((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]));
-    }
 
     const handlePostSubmit = async (content: string, imageUrls: string[]) => {
         setIsPosting(true);
@@ -77,9 +72,7 @@ const HomePageInternal = () => {
                             <p className='text-gray-500'>No posts yet. Be the first to share something!</p>
                         </div>
                     ) : (
-                        sortedPosts.map((post) => (
-                            <PostCard key={post.id} post={post} isLiked={liked.includes(post.id)} onLike={toggleLike} />
-                        ))
+                        sortedPosts.map((post) => <PostCard key={post.id} post={post} initialIsLiked={post.isLiked} />)
                     )}
                 </div>
             </div>
