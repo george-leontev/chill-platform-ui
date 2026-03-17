@@ -4,6 +4,7 @@ import { Avatar } from "antd";
 import { PostsModel } from "../models/posts-model";
 import PostImagesGallery from "./post-images-gallery";
 import LikeButton from "./like-button";
+import ShareButton from "./share-button";
 
 interface PostCardProps {
     post: PostsModel;
@@ -64,8 +65,9 @@ const PostCard = ({ post, initialIsLiked = false }: PostCardProps) => {
                     {/* Content text below images */}
                     <p className='text-gray-700 mt-3'>{post.content}</p>
 
-                    <div className='mt-3'>
+                    <div className='flex items-center gap-6 mt-4'>
                         <LikeButton postId={post.id} initialIsLiked={initialIsLiked} />
+                        <ShareButton postId={post.id} content={post.content} />
                     </div>
                 </div>
             </div>
