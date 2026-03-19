@@ -3,7 +3,7 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { PostsModel } from "../models/posts-model";
 import { CreateOrUpdatePostModel } from "../models/create-or-update-post-model";
-import { routes, postRoutes } from "../constants/app-api-routes";
+import { routes } from "../constants/app-api-routes";
 import { HttpConstants } from "../constants/app-http-constants";
 import { useAuthHttpRequest } from "./use-auth-http-request";
 import { PostLikeResponseModel } from "../models/post-like-response-model";
@@ -128,7 +128,7 @@ export function PostsProvider({ children }: { children: ReactNode }) {
             try {
                 const response = await authHttpRequest({
                     method: "POST",
-                    url: postRoutes.toggleLike(postId),
+                    url: routes.toggleLike(postId),
                 });
 
                 if (response && response.data && (response.status === HttpConstants.StatusCodes.Ok)) {

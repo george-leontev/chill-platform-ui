@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import AppLayout from "./components/app-layout";
 import { AuthProvider } from "./contexts/app-auth-context";
 import { PostsProvider } from "./contexts/posts-data-context";
+import { MessagesProvider } from "./contexts/messages-context";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -30,7 +31,9 @@ export default function RootLayout({
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}>
                 <AuthProvider>
                     <PostsProvider>
-                        <AppLayout>{children}</AppLayout>
+                        <MessagesProvider>
+                            <AppLayout>{children}</AppLayout>
+                        </MessagesProvider>
                     </PostsProvider>
                 </AuthProvider>
             </body>

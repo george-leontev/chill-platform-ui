@@ -10,8 +10,12 @@ export const routes = {
     posts: "/api/posts",
     myPosts: "/api/posts/my",
     likedPosts: "/api/posts/liked",
+    toggleLike: (postId: number) => `/api/posts/${postId}/like`,
 };
 
-export const postRoutes = {
-    toggleLike: (postId: number) => `/api/posts/${postId}/like`,
+export const messageRoutes = {
+    conversations: "/api/messages/conversations",
+    conversation: (userId: number) => `/api/messages/${userId}`,
+    markAsRead: (userId: number) => `/api/messages/${userId}/read`,
+    onlineStatus: (userId: number) => `/api/users/${userId}/online`,
 };
