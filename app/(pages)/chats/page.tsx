@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense, useCallback } from "react";
 import ChatWindow from "./components/chat-window";
 import ChatsList from "./components/chats-list";
 import { useMessages } from "../../contexts/messages-context";
@@ -16,11 +16,14 @@ export default function ChatsPage() {
     const userData = getUserAuthDataFromStorage();
     const currentUserId = userData?.userId;
 
-    const handleSelectChat = (conversation: ConversationModel) => {
-        setSelectedChat(conversation);
-        getConversationAsync(conversation.partner.id);
-        markAsRead(conversation.partner.id);
-    };
+    const handleSelectChat = useCallback(
+        async (conversation: ConversationModel) => {
+            setSelectedChat(conversation);
+            await getConversationAsync(conversation.partner.id);
+            markAsRead(conversation.partner.id);
+        },
+        [getConversationAsync, markAsRead],
+    );
 
     const handleSendMessage = (text: string) => {
         if (!selectedChat) return;
@@ -31,19 +34,22 @@ export default function ChatsPage() {
         return null;
     }
 
-    return selectedChat ? (
-        <ChatWindow
-            selectedChat={selectedChat}
-            messages={messages}
-            currentUserId={currentUserId}
-            onBack={() => setSelectedChat(null)}
-            onSendMessage={handleSendMessage}
-        />
-    ) : (
-        <ChatsList
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onSelectChat={handleSelectChat}
-        />
+    return (
+        <Suspense
+            name='Next.MetadataOutlet'
+            fallback={<div className='text-center py-12 text-gray-400'>Loading...</div>}
+        >
+            {selectedChat ? (
+                <ChatWindow
+                    selectedChat={selectedChat}
+                    messages={messages}
+                    currentUserId={currentUserId}
+                    onBack={() => setSelectedChat(null)}
+                    onSendMessage={handleSendMessage}
+                />
+            ) : (
+                <ChatsList searchQuery={searchQuery} onSearchChange={setSearchQuery} onSelectChat={handleSelectChat} />
+            )}
+        </Suspense>
     );
 }

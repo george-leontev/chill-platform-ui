@@ -10,9 +10,10 @@ interface DrawerNavItemProps {
     icon: LucideIcon;
     href: string;
     isActive: boolean;
+    showUnreadDot?: boolean;
 }
 
-export default function DrawerNavItem({ label, icon: Icon, href, isActive }: DrawerNavItemProps) {
+export default function DrawerNavItem({ label, icon: Icon, href, isActive, showUnreadDot }: DrawerNavItemProps) {
     const ref = useRef<HTMLDivElement>(null);
 
     const x = useMotionValue(0);
@@ -80,6 +81,9 @@ export default function DrawerNavItem({ label, icon: Icon, href, isActive }: Dra
                     }
                 />
                 <span className='font-medium'>{label}</span>
+                {showUnreadDot && (
+                    <span className='ml-auto w-2 h-2 bg-violet-600 rounded-full' />
+                )}
             </motion.div>
         </Link>
     );

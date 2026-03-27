@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Avatar, Input } from "antd";
 import { ArrowLeft, Send, Smile, Paperclip, Phone, Video } from "lucide-react";
 import ChatMessageBubble from "./chat-message-bubble";
 import EmojiPicker from "@/app/components/emoji-picker";
 import { ConversationModel } from "@/app/models/conversation-model";
 import { MessageModel } from "@/app/models/message-model";
+import { useMessages } from "@/app/contexts/messages-context";
 
 const { TextArea } = Input;
 
@@ -19,14 +20,47 @@ interface ChatWindowProps {
 }
 
 export default function ChatWindow({ selectedChat, messages, currentUserId, onBack, onSendMessage }: ChatWindowProps) {
+    const { sendTypingIndicator, isUserTyping, markAsRead } = useMessages();
     const [messageInput, setMessageInput] = useState("");
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
+    const prevMessagesLengthRef = useRef<number>(0);
+
+    const partnerTyping = isUserTyping(selectedChat.partner.id);
+
+    const scrollToBottom = useCallback(() => {
+        if (messagesContainerRef.current) {
+            messagesContainerRef.current.scrollTo({
+                top: messagesContainerRef.current.scrollHeight,
+                behavior: "smooth",
+            });
+        }
+    }, []);
+
+    // Mark messages as read when new messages arrive from partner
+    useEffect(() => {
+        const unreadFromPartner = messages.filter(
+            (m) => m.senderId === selectedChat.partner.id && !m.isRead,
+        );
+
+        if (unreadFromPartner.length > 0 && prevMessagesLengthRef.current !== messages.length) {
+            markAsRead(selectedChat.partner.id);
+        }
+        prevMessagesLengthRef.current = messages.length;
+    }, [messages, selectedChat.partner.id, markAsRead]);
+
+    // Scroll to bottom when messages change or typing indicator appears/disappears
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages, partnerTyping, scrollToBottom]);
 
     const handleSendMessage = useCallback(() => {
         if (!messageInput.trim()) return;
         onSendMessage(messageInput);
         setMessageInput("");
-    }, [messageInput, onSendMessage]);
+        // Stop typing indicator when message is sent
+        sendTypingIndicator(selectedChat.partner.id, false);
+    }, [messageInput, onSendMessage, sendTypingIndicator, selectedChat.partner.id]);
 
     const handleKeyPress = useCallback(
         (e: React.KeyboardEvent) => {
@@ -41,6 +75,26 @@ export default function ChatWindow({ selectedChat, messages, currentUserId, onBa
     const handleEmojiSelect = (emoji: string) => {
         setMessageInput((prev) => prev + emoji);
     };
+
+    // Send typing indicator when user starts/stops typing
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            if (messageInput.trim()) {
+                sendTypingIndicator(selectedChat.partner.id, true);
+            } else {
+                sendTypingIndicator(selectedChat.partner.id, false);
+            }
+        }, 500);
+
+        return () => clearTimeout(timeout);
+    }, [messageInput, sendTypingIndicator, selectedChat.partner.id]);
+
+    // Stop typing indicator when component unmounts (user leaves chat)
+    useEffect(() => {
+        return () => {
+            sendTypingIndicator(selectedChat.partner.id, false);
+        };
+    }, [sendTypingIndicator, selectedChat.partner.id]);
 
     return (
         <div className='w-full flex justify-center h-[calc(100vh-2rem)]'>
@@ -82,7 +136,7 @@ export default function ChatWindow({ selectedChat, messages, currentUserId, onBa
                 </div>
 
                 {/* Messages */}
-                <div className='flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50'>
+                <div ref={messagesContainerRef} className='flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50'>
                     {!messages || messages.length === 0 ? (
                         <div className='text-center py-12'>
                             <p className='text-gray-500'>No messages yet. Say hi! 👋</p>
@@ -91,6 +145,17 @@ export default function ChatWindow({ selectedChat, messages, currentUserId, onBa
                         messages.map((msg) => (
                             <ChatMessageBubble key={msg.id} message={msg} currentUserId={currentUserId} />
                         ))
+                    )}
+                    {/* Typing indicator */}
+                    {partnerTyping && (
+                        <div className='flex items-center gap-2 text-gray-500 text-sm'>
+                            <div className='flex gap-1'>
+                                <span className='w-2 h-2 bg-gray-400 rounded-full animate-bounce' style={{ animationDelay: '0ms' }} />
+                                <span className='w-2 h-2 bg-gray-400 rounded-full animate-bounce' style={{ animationDelay: '150ms' }} />
+                                <span className='w-2 h-2 bg-gray-400 rounded-full animate-bounce' style={{ animationDelay: '300ms' }} />
+                            </div>
+                            <span>{selectedChat.partner.firstName} is typing...</span>
+                        </div>
                     )}
                 </div>
 

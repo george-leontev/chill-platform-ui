@@ -14,11 +14,15 @@ type MessagesContextType = {
     isLoading: boolean;
     isConnected: boolean;
     onlineUsers: Set<number>;
+    typingUsers: Map<number, boolean>;
+    hasUnreadMessages: boolean;
     getConversationsAsync: () => Promise<void>;
     getConversationAsync: (partnerId: number) => Promise<void>;
     sendMessage: (receiverId: number, content: string) => void;
     markAsRead: (partnerId: number) => void;
+    sendTypingIndicator: (receiverId: number, isTyping: boolean) => void;
     isUserOnline: (userId: number) => boolean;
+    isUserTyping: (userId: number) => boolean;
 };
 
 const MessagesContext = createContext<MessagesContextType | undefined>(undefined);
@@ -32,8 +36,10 @@ export function MessagesProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
     const [onlineUsers, setOnlineUsers] = useState<Set<number>>(new Set());
+    const [typingUsers, setTypingUsers] = useState<Map<number, boolean>>(new Map());
 
     const wsRef = useRef<WebSocket | null>(null);
+    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const getConversationsAsync = useCallback(async () => {
         setIsLoading(true);
@@ -80,17 +86,25 @@ export function MessagesProvider({ children }: { children: ReactNode }) {
                 method: "PUT",
                 url: messageRoutes.markAsRead(partnerId),
             });
+
             // update unread count locally
             setConversations((prev) => prev.map((c) => (c.partner.id === partnerId ? { ...c, unreadCount: 0 } : c)));
-            // send read receipt via WS only if connected
-            if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-                wsRef.current.send(
-                    JSON.stringify({
-                        type: "read",
-                        sender_id: partnerId,
-                    }),
-                );
+
+            // mark all messages from this partner as read immediately
+            setMessages((prev) => prev.map((m) => (m.senderId === partnerId ? { ...m, isRead: true } : m)));
+
+            // send read receipt via WS
+            if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+                console.error("WebSocket is not connected");
+                return;
             }
+
+            wsRef.current.send(
+                JSON.stringify({
+                    type: "read",
+                    sender_id: partnerId,
+                }),
+            );
         },
         [authHttpRequest],
     );
@@ -127,8 +141,9 @@ export function MessagesProvider({ children }: { children: ReactNode }) {
             };
 
             ws.onerror = (err) => {
-                console.error("WebSocket error:", err);
-                ws.close();
+                console.error("WebSocket error - connection failed. Check if WS server is running at:", wsUrl);
+                console.error("Error details:", err);
+                // Don't close immediately - let onclose handle reconnection
             };
 
             ws.onmessage = (event) => {
@@ -159,8 +174,18 @@ export function MessagesProvider({ children }: { children: ReactNode }) {
                 }
 
                 if (payload.type === "read") {
-                    // Update message read status in current conversation
-                    setMessages((prev) => prev.map((m) => (m.id === payload.message_id ? { ...m, isRead: true } : m)));
+                    const byUserId = payload.data?.byUserId;
+                    console.log("Read receipt received for messages sent to user:", byUserId);
+
+                    // mark all messages sent TO that user as read (they read our messages)
+                    setMessages((prev) =>
+                        prev.map((m) => {
+                            if (m.receiverId === byUserId && !m.isRead) {
+                                return { ...m, isRead: true };
+                            }
+                            return m;
+                        }),
+                    );
                 }
 
                 if (payload.type === "online_users") {
@@ -197,12 +222,25 @@ export function MessagesProvider({ children }: { children: ReactNode }) {
                         prev.map((c) => (c.partner.id === userId ? { ...c, is_online: false } : c)),
                     );
                 }
+
+                if (payload.type === "typing") {
+                    const userId = payload.data?.user_id as number;
+                    const isTyping = payload.data?.is_typing as boolean;
+                    setTypingUsers((prev) => {
+                        const next = new Map(prev);
+                        next.set(userId, isTyping);
+                        return next;
+                    });
+                }
             };
         };
 
         connect();
 
         return () => {
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+            }
             wsRef.current?.close();
             wsRef.current = null;
         };
@@ -219,6 +257,28 @@ export function MessagesProvider({ children }: { children: ReactNode }) {
         [onlineUsers],
     );
 
+    const isUserTyping = useCallback(
+        (userId: number) => {
+            return typingUsers.get(userId) === true;
+        },
+        [typingUsers],
+    );
+
+    const sendTypingIndicator = useCallback((receiverId: number, isTyping: boolean) => {
+        if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+            return;
+        }
+        wsRef.current.send(
+            JSON.stringify({
+                type: "typing",
+                receiver_id: receiverId,
+                is_typing: isTyping,
+            }),
+        );
+    }, []);
+
+    const hasUnreadMessages = conversations.some((c) => c.unreadCount > 0);
+
     return (
         <MessagesContext.Provider
             value={{
@@ -227,11 +287,15 @@ export function MessagesProvider({ children }: { children: ReactNode }) {
                 isLoading,
                 isConnected,
                 onlineUsers,
+                typingUsers,
+                hasUnreadMessages,
                 isUserOnline,
+                isUserTyping,
                 getConversationsAsync,
                 getConversationAsync,
                 sendMessage,
                 markAsRead,
+                sendTypingIndicator,
             }}
         >
             {children}

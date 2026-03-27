@@ -5,6 +5,7 @@ import Sider from "antd/es/layout/Sider";
 import { Home, MessageCircle, FileText, Heart, User, LifeBuoy } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useMessages } from "../contexts/messages-context";
 import DrawerNavItem from "./drawer-nav-item";
 
 const navItems = [
@@ -18,6 +19,7 @@ const navItems = [
 
 export default function AppDrawer() {
     const pathname = usePathname();
+    const { hasUnreadMessages } = useMessages();
 
     return (
         <Sider width={290} theme='light' className='!fixed top-0 left-0 h-screen border-r border-gray-100 z-50'>
@@ -32,7 +34,8 @@ export default function AppDrawer() {
                 <div className='flex-1 p-3 flex flex-col gap-1'>
                     {navItems.map((item, i) => {
                         const isActive = pathname === item.href;
-                        return <DrawerNavItem key={i} {...item} isActive={isActive} />;
+                        const showUnreadDot = item.href === "/chats" && hasUnreadMessages;
+                        return <DrawerNavItem key={i} {...item} isActive={isActive} showUnreadDot={showUnreadDot} />;
                     })}
 
                     <Divider className='my-4' />
