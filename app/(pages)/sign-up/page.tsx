@@ -3,10 +3,11 @@
 import { Input, Form } from "antd";
 import type { FormProps } from "antd";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, Moon, Loader2, User } from "lucide-react";
+import { Mail, Lock, Moon, Loader2, User, AtSign, Calendar } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { SideArea } from "@/app/components/sign-in/side-area";
+import { CursorAnimation } from "@/app/components/cursor-animation";
 
 type FieldType = {
     name?: string;
@@ -14,6 +15,10 @@ type FieldType = {
     password?: string;
     confirmPassword?: string;
     agree?: boolean;
+    firstName?: string;
+    lastName?: string;
+    username?: string;
+    age?: number;
 };
 
 export default function SignUpPage() {
@@ -58,11 +63,11 @@ export default function SignUpPage() {
                     </div>
 
                     <div className='mb-8'>
-                        <h2 className='text-3xl font-bold text-gray-900 mb-2'>Create account</h2>
+                        <h2 className='text-3xl font-bold text-gray-900 mb-2'>Создать аккаунт</h2>
                         <p className='text-gray-500'>
-                            Already have an account?{" "}
-                            <Link href='/signin' className='text-purple-600 hover:text-purple-700 font-medium'>
-                                Sign in
+                            Уже есть аккаунт?{" "}
+                            <Link href='/sign-in' className='text-purple-600 hover:text-purple-700 font-medium'>
+                                Войти
                             </Link>
                         </p>
                     </div>
@@ -76,19 +81,81 @@ export default function SignUpPage() {
                         requiredMark={false}
                         className='w-full'
                     >
+                        <div className='grid grid-cols-2 gap-4'>
+                            <Form.Item<FieldType>
+                                name='firstName'
+                                rules={[
+                                    { required: true, message: "Введите имя" },
+                                    { min: 2, message: "Имя должно содержать не менее 2 символов" },
+                                ]}
+                            >
+                                <div>
+                                    <label className='block text-sm font-medium text-gray-700 mb-2'>Имя</label>
+                                    <Input
+                                        size='large'
+                                        placeholder='Имя'
+                                        prefix={<User className='w-4 h-4 text-gray-400' />}
+                                        className='rounded-lg h-12 hover:border-purple-400 focus:border-purple-600'
+                                        disabled={isLoading}
+                                    />
+                                </div>
+                            </Form.Item>
+
+                            <Form.Item<FieldType>
+                                name='lastName'
+                                rules={[
+                                    { required: true, message: "Введите фамилию" },
+                                    { min: 2, message: "Фамилия должна содержать не менее 2 символов" },
+                                ]}
+                            >
+                                <div>
+                                    <label className='block text-sm font-medium text-gray-700 mb-2'>Фамилия</label>
+                                    <Input
+                                        size='large'
+                                        placeholder='Фамилия'
+                                        prefix={<User className='w-4 h-4 text-gray-400' />}
+                                        className='rounded-lg h-12 hover:border-purple-400 focus:border-purple-600'
+                                        disabled={isLoading}
+                                    />
+                                </div>
+                            </Form.Item>
+                        </div>
+
                         <Form.Item<FieldType>
-                            name='name'
+                            name='username'
                             rules={[
-                                { required: true, message: "Please enter your name" },
-                                { min: 2, message: "Name must be at least 2 characters" },
+                                { required: true, message: "Введите имя пользователя" },
+                                { min: 3, message: "Имя пользователя должно содержать не менее 3 символов" },
+                                { pattern: /^[a-zA-Z0-9_]+$/, message: "Имя пользователя может содержать только буквы, цифры и подчеркивания" },
                             ]}
                         >
                             <div>
-                                <label className='block text-sm font-medium text-gray-700 mb-2'>Full name</label>
+                                <label className='block text-sm font-medium text-gray-700 mb-2'>Имя пользователя</label>
                                 <Input
                                     size='large'
-                                    placeholder='Enter your full name'
-                                    prefix={<User className='w-4 h-4 text-gray-400' />}
+                                    placeholder='Придумайте имя пользователя'
+                                    prefix={<AtSign className='w-4 h-4 text-gray-400' />}
+                                    className='rounded-lg h-12 hover:border-purple-400 focus:border-purple-600'
+                                    disabled={isLoading}
+                                />
+                            </div>
+                        </Form.Item>
+
+                        <Form.Item<FieldType>
+                            name='age'
+                            rules={[
+                                { required: true, message: "Введите ваш возраст" },
+                                { type: 'number', min: 13, message: "Вам должно быть не менее 13 лет" },
+                                { type: 'number', max: 120, message: "Введите корректный возраст" },
+                            ]}
+                        >
+                            <div>
+                                <label className='block text-sm font-medium text-gray-700 mb-2'>Возраст</label>
+                                <Input
+                                    size='large'
+                                    type='number'
+                                    placeholder='Ваш возраст'
+                                    prefix={<Calendar className='w-4 h-4 text-gray-400' />}
                                     className='rounded-lg h-12 hover:border-purple-400 focus:border-purple-600'
                                     disabled={isLoading}
                                 />
@@ -98,15 +165,15 @@ export default function SignUpPage() {
                         <Form.Item<FieldType>
                             name='email'
                             rules={[
-                                { required: true, message: "Please enter your email" },
-                                { type: "email", message: "Please enter a valid email" },
+                                { required: true, message: "Введите ваш email" },
+                                { type: "email", message: "Введите корректный email" },
                             ]}
                         >
                             <div>
-                                <label className='block text-sm font-medium text-gray-700 mb-2'>Email address</label>
+                                <label className='block text-sm font-medium text-gray-700 mb-2'>Электронная почта</label>
                                 <Input
                                     size='large'
-                                    placeholder='Enter your email'
+                                    placeholder='Введите ваш email'
                                     prefix={<Mail className='w-4 h-4 text-gray-400' />}
                                     className='rounded-lg h-12 hover:border-purple-400 focus:border-purple-600'
                                     disabled={isLoading}
@@ -117,15 +184,15 @@ export default function SignUpPage() {
                         <Form.Item<FieldType>
                             name='password'
                             rules={[
-                                { required: true, message: "Please enter your password" },
-                                { min: 6, message: "Password must be at least 6 characters" }
+                                { required: true, message: "Введите пароль" },
+                                { min: 6, message: "Пароль должен содержать не менее 6 символов" }
                             ]}
                         >
                             <div>
-                                <label className='block text-sm font-medium text-gray-700 mb-2'>Password</label>
+                                <label className='block text-sm font-medium text-gray-700 mb-2'>Пароль</label>
                                 <Input.Password
                                     size='large'
-                                    placeholder='Create a password'
+                                    placeholder='Придумайте пароль'
                                     prefix={<Lock className='w-4 h-4 text-gray-400' />}
                                     className='rounded-lg h-12 hover:border-purple-400 focus:border-purple-600'
                                     disabled={isLoading}
@@ -137,22 +204,22 @@ export default function SignUpPage() {
                             name='confirmPassword'
                             dependencies={["password"]}
                             rules={[
-                                { required: true, message: "Please confirm your password" },
+                                { required: true, message: "Подтвердите пароль" },
                                 ({ getFieldValue }) => ({
                                     validator(_, value) {
                                         if (!value || getFieldValue("password") === value) {
                                             return Promise.resolve();
                                         }
-                                        return Promise.reject(new Error("Passwords do not match"));
+                                        return Promise.reject(new Error("Пароли не совпадают"));
                                     },
                                 }),
                             ]}
                         >
                             <div>
-                                <label className='block text-sm font-medium text-gray-700 mb-2'>Confirm password</label>
+                                <label className='block text-sm font-medium text-gray-700 mb-2'>Подтверждение пароля</label>
                                 <Input.Password
                                     size='large'
-                                    placeholder='Confirm your password'
+                                    placeholder='Подтвердите ваш пароль'
                                     prefix={<Lock className='w-4 h-4 text-gray-400' />}
                                     className='rounded-lg h-12 hover:border-purple-400 focus:border-purple-600'
                                     disabled={isLoading}
@@ -189,23 +256,23 @@ export default function SignUpPage() {
                                 {isLoading ? (
                                     <div className='flex items-center justify-center gap-2'>
                                         <Loader2 className='w-5 h-5 animate-spin' />
-                                        <span>Creating account...</span>
+                                        <span>Создание аккаунта...</span>
                                     </div>
                                 ) : (
-                                    "Create account"
+                                    "Создать аккаунт"
                                 )}
                             </button>
                         </Form.Item>
                     </Form>
 
                     <p className='text-center text-xs text-gray-400 mt-8'>
-                        By creating an account, you agree to our{" "}
+                        Создавая аккаунт, вы соглашаетесь с нашими{" "}
                         <a href='/terms' className='text-purple-600 hover:text-purple-700'>
-                            Terms of Service
+                            Условиями использования
                         </a>{" "}
-                        and{" "}
+                        и{" "}
                         <a href='/privacy' className='text-purple-600 hover:text-purple-700'>
-                            Privacy Policy
+                            Политикой конфиденциальности
                         </a>
                     </p>
                 </div>

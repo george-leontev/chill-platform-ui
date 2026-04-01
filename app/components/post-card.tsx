@@ -49,7 +49,7 @@ const PostCard = ({ post, initialIsLiked = false }: PostCardProps) => {
                 <div className='flex-1'>
                     <div className='flex items-center gap-2'>
                         <span className='font-semibold text-gray-800'>
-                            {post.author.first_name} {post.author.last_name}
+                            {post.author.firstName} {post.author.lastName}
                         </span>
 
                         <span className='text-sm text-gray-500'>{post.author.username}</span>

@@ -5,6 +5,8 @@ import AppLayout from "./components/app-layout";
 import { AuthProvider } from "./contexts/app-auth-context";
 import { PostsProvider } from "./contexts/posts-data-context";
 import { MessagesProvider } from "./contexts/messages-context";
+import { ProfileProvider } from "./contexts/profile-context";
+import { CursorAnimation } from "./components/cursor-animation";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -32,7 +34,12 @@ export default function RootLayout({
                 <AuthProvider>
                     <PostsProvider>
                         <MessagesProvider>
-                            <AppLayout>{children}</AppLayout>
+                            <ProfileProvider>
+                                <AppLayout>
+                                    {children}
+                                    <CursorAnimation />
+                                </AppLayout>
+                            </ProfileProvider>
                         </MessagesProvider>
                     </PostsProvider>
                 </AuthProvider>

@@ -41,3 +41,32 @@ export function formatMessageBubbleTime(dateString: string): string {
             date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
     }
 }
+
+/**
+ * Formats a birth date string to a readable format with day, month, and year
+ * Example: "September 25, 2007"
+ */
+export function formatBirthDate(dateString: string | Date | null | undefined): string {
+    if (!dateString) return "Not specified";
+    try {
+        const date = typeof dateString === "string" ? new Date(dateString) : dateString;
+        if (isNaN(date.getTime())) return "Not specified";
+        return date.toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" });
+    } catch {
+        return "Not specified";
+    }
+}
+
+/**
+ * Parses a date string or Date object to YYYY-MM-DD format for date input fields
+ */
+export function parseDateForInput(dateString: string | Date | null | undefined): string {
+    if (!dateString) return "";
+    try {
+        const date = typeof dateString === "string" ? new Date(dateString) : dateString;
+        if (isNaN(date.getTime())) return "";
+        return date.toISOString().split("T")[0];
+    } catch {
+        return "";
+    }
+}

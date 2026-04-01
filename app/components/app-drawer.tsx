@@ -6,6 +6,8 @@ import { Home, MessageCircle, FileText, Heart, User, LifeBuoy } from "lucide-rea
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useMessages } from "../contexts/messages-context";
+import { useProfile } from "../contexts/profile-context";
+import { useAuth } from "../contexts/app-auth-context";
 import DrawerNavItem from "./drawer-nav-item";
 
 const navItems = [
@@ -20,6 +22,11 @@ const navItems = [
 export default function AppDrawer() {
     const pathname = usePathname();
     const { hasUnreadMessages } = useMessages();
+    const { profile } = useProfile();
+    const { user } = useAuth();
+
+    const displayName = profile?.id ? (profile.location || "User") : user?.email?.split("@")[0] || "User";
+    const avatarUrl = profile?.avatarUrl || "https://i.pravatar.cc/100";
 
     return (
         <Sider width={290} theme='light' className='!fixed top-0 left-0 h-screen border-r border-gray-100 z-50'>
@@ -42,16 +49,13 @@ export default function AppDrawer() {
                 </div>
 
                 {/* PROFILE */}
-                <div className='border-t border-gray-100 p-4 bg-violet-50/40 flex-shrink-0'>
+                <div className='border-t border-gray-100 p-4 bg-violet-50/40 shrink-0'>
                     <div className='flex items-center gap-3'>
-                        <Avatar size={44} src='https://i.pravatar.cc/100' className='ring-2 ring-violet-500' />
+                        <Avatar size={44} src={avatarUrl} className='ring-2 ring-violet-500' />
 
                         <div className='flex flex-col leading-tight'>
-                            <span className='font-semibold text-gray-800'>John Doe</span>
-
-                            <span className='text-xs text-violet-600 font-medium'>Member</span>
-
-                            <span className='text-xs text-gray-500'>@johndoe</span>
+                            <span className='font-semibold text-gray-800'>{displayName}</span>
+                            <span className='text-xs text-gray-500'>@{user?.email?.split("@")[0] || "user"}</span>
                         </div>
                     </div>
                 </div>

@@ -10,6 +10,7 @@ import { SideArea } from "@/app/components/sign-in/side-area";
 import { AuthProvider, useAuth } from "@/app/contexts/app-auth-context";
 import { SignInModel } from "@/app/models/signin-model";
 import { proclaim } from "@/app/utils/proclaim";
+import { CursorAnimation } from "@/app/components/cursor-animation";
 
 type FieldType = {
     email?: string;
@@ -75,7 +76,7 @@ const SignInPageInternal = () => {
                         <h2 className='text-3xl font-bold text-gray-900 mb-2'>Вход в систему</h2>
                         <p className='text-gray-500'>
                             Нет аккаунта?{" "}
-                            <Link href='/signup' className='text-purple-600 hover:text-purple-700 font-medium'>
+                            <Link href='/sign-up' className='text-purple-600 hover:text-purple-700 font-medium'>
                                 Зарегистрироваться
                             </Link>
                         </p>

@@ -1,9 +1,3 @@
-export type PostAuthorModel = {
-    id: number;
+import { UserInfoModel } from "./user-info-model";
 
-    first_name: string;
-
-    last_name: string;
-
-    username: string;
-};
+export type PostAuthorModel = Pick<UserInfoModel, "id" | "firstName" | "lastName" | "username">;

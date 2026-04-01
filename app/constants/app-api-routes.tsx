@@ -1,8 +1,14 @@
+const getHost = () => {
+    if (typeof window === "undefined") {
+        return "http://localhost:8000";
+    }
+    return process.env.NODE_ENV !== "production"
+        ? "http://localhost:8000"
+        : `http://${window.location.hostname}:${process.env.NEXT_PUBLIC_WEB_API_PORT}`;
+};
+
 export const routes = {
-    host:
-        process.env.NODE_ENV !== "production"
-            ? "http://localhost:8000"
-            : `http://${window.location.hostname}:${process.env.NEXT_PUBLIC_WEB_API_PORT}`,
+    host: getHost(),
     signIn: "/api/sign-in",
     signOut: "/sign-out",
     signUp: "/sign-up",
@@ -11,6 +17,7 @@ export const routes = {
     myPosts: "/api/posts/my",
     likedPosts: "/api/posts/liked",
     toggleLike: (postId: number) => `/api/posts/${postId}/like`,
+    profile: "/api/profile"
 };
 
 export const messageRoutes = {
