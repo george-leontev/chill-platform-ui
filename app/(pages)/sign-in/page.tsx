@@ -10,7 +10,6 @@ import { SideArea } from "@/app/components/sign-in/side-area";
 import { AuthProvider, useAuth } from "@/app/contexts/app-auth-context";
 import { SignInModel } from "@/app/models/signin-model";
 import { proclaim } from "@/app/utils/proclaim";
-import { CursorAnimation } from "@/app/components/cursor-animation";
 
 type FieldType = {
     email?: string;

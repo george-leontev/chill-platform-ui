@@ -7,7 +7,6 @@ import { Mail, Lock, Moon, Loader2, User, AtSign, Calendar } from "lucide-react"
 import { useState } from "react";
 import Link from "next/link";
 import { SideArea } from "@/app/components/sign-in/side-area";
-import { CursorAnimation } from "@/app/components/cursor-animation";
 
 type FieldType = {
     name?: string;
