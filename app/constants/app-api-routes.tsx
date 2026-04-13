@@ -10,14 +10,17 @@ const getHost = () => {
 export const routes = {
     host: getHost(),
     signIn: "/api/sign-in",
-    signOut: "/sign-out",
-    signUp: "/sign-up",
+    signOut: "/api/sign-out",
+    signUp: "/api/sign-up",
     verification: "/verification",
     posts: "/api/posts",
     myPosts: "/api/posts/my",
     likedPosts: "/api/posts/liked",
     toggleLike: (postId: number) => `/api/posts/${postId}/like`,
-    profile: "/api/profile"
+    profile: "/api/profile",
+    supportTicket: "/api/support/ticket",
+    supportMessage: "/api/support/ticket/message",
+    wsSupport: "/api/ws/support",
 };
 
 export const messageRoutes = {

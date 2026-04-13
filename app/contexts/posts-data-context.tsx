@@ -13,6 +13,8 @@ type NewsContextType = {
     isLoading: boolean;
     getPostByIdAsync: (id: number) => Promise<PostsModel | undefined>;
     createPostAsync: (post: CreateOrUpdatePostModel) => Promise<PostsModel | undefined>;
+    updatePostAsync: (postId: number, post: CreateOrUpdatePostModel) => Promise<PostsModel | undefined>;
+    deletePostAsync: (postId: number) => Promise<PostsModel | undefined>;
     getMyPostsAsync: () => Promise<PostsModel[] | undefined>;
     getLikedPostsAsync: () => Promise<PostsModel[] | undefined>;
     toggleLikeAsync: (postId: number) => Promise<PostLikeResponseModel | undefined>;
@@ -103,6 +105,55 @@ export function PostsProvider({ children }: { children: ReactNode }) {
         [authHttpRequest],
     );
 
+    const updatePostAsync = useCallback(
+        async (postId: number, post: CreateOrUpdatePostModel) => {
+            try {
+                const response = await authHttpRequest({
+                    method: "PUT",
+                    url: `${routes.posts}/${postId}`,
+                    data: post,
+                });
+
+                if (response && response.data && response.status === 200) {
+                    const updatedPost = response.data as PostsModel;
+
+                    if (!updatedPost) {
+                        return;
+                    }
+
+                    setPosts((prev) => prev.map((p) => (p.id === postId ? updatedPost : p)));
+
+                    return updatedPost;
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        },
+        [authHttpRequest],
+    );
+
+    const deletePostAsync = useCallback(
+        async (postId: number) => {
+            try {
+                const response = await authHttpRequest({
+                    method: "DELETE",
+                    url: `${routes.posts}/${postId}`,
+                });
+
+                if (response && response.data && response.status === 200) {
+                    const deletedPost = response.data as PostsModel;
+
+                    setPosts((prev) => prev.filter((p) => p.id !== postId));
+
+                    return deletedPost;
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        },
+        [authHttpRequest],
+    );
+
     const getMyPostsAsync = useCallback(async () => {
         setIsLoading(true);
         try {
@@ -175,7 +226,7 @@ export function PostsProvider({ children }: { children: ReactNode }) {
 
     return (
         <NewsContext.Provider
-            value={{ posts, isLoading, getPostByIdAsync, createPostAsync, getMyPostsAsync, getLikedPostsAsync, toggleLikeAsync }}
+            value={{ posts, isLoading, getPostByIdAsync, createPostAsync, updatePostAsync, deletePostAsync, getMyPostsAsync, getLikedPostsAsync, toggleLikeAsync }}
         >
             {children}
         </NewsContext.Provider>

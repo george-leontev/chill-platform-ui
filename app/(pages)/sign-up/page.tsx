@@ -7,40 +7,73 @@ import { Mail, Lock, Moon, Loader2, User, AtSign, Calendar } from "lucide-react"
 import { useState } from "react";
 import Link from "next/link";
 import { SideArea } from "@/app/components/sign-in/side-area";
+import { useAuth } from "@/app/contexts/app-auth-context";
+import { SignUpModel } from "@/app/models/signup-model";
+import { proclaimError } from "@/app/utils/proclaim";
 
 type FieldType = {
-    name?: string;
-    email?: string;
-    password?: string;
-    confirmPassword?: string;
-    agree?: boolean;
     firstName?: string;
     lastName?: string;
     username?: string;
-    age?: number;
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+    age?: string | number;
 };
 
 export default function SignUpPage() {
     const router = useRouter();
     const [form] = Form.useForm();
     const [isLoading, setIsLoading] = useState(false);
+    const { signUp } = useAuth();
 
     const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
+        if (values.password !== values.confirmPassword) {
+            form.setFields([
+                {
+                    name: "confirmPassword",
+                    errors: ["Пароли не совпадают"],
+                },
+            ]);
+            return;
+        }
+
         setIsLoading(true);
 
         try {
-            await new Promise((resolve) => setTimeout(resolve, 1500));
+            const signUpPayload: SignUpModel = {
+                userName: values.username ?? null,
+                email: values.email ?? null,
+                password: values.password ?? null,
+                confirmedPassword: values.confirmPassword ?? null,
+                firstName: values.firstName ?? null,
+                lastName: values.lastName ?? null,
+                age: typeof values.age === 'number' ? values.age : (values.age ? Number(values.age) : null),
+                profilePicture: null,
+            };
 
-            console.log("Registration attempt with:", values);
+            await signUp(signUpPayload);
+
             router.push("/home");
         } catch (error) {
-            form.setFields([
-                {
-                    name: "email",
-                    errors: ["This email is already registered"],
-                },
-            ]);
-            console.log(error);
+            const status = (error as { response?: { status?: number } })?.response?.status;
+            const detail = (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+
+            if (status === 409 && detail) {
+                // Show conflict errors on the correct field
+                if (detail.includes("email") || detail.includes("почт") || detail.includes("Email")) {
+                    form.setFields([{ name: "email", errors: [detail] }]);
+                } else if (detail.includes("имен") || detail.includes("username") || detail.includes("name")) {
+                    form.setFields([{ name: "username", errors: [detail] }]);
+                } else {
+                    form.setFields([{ name: "email", errors: [detail] }]);
+                }
+            } else if (status === 422 && detail) {
+                // Validation errors — show on email as fallback
+                form.setFields([{ name: "email", errors: [detail] }]);
+            } else {
+                await proclaimError(error);
+            }
         } finally {
             setIsLoading(false);
         }
@@ -144,19 +177,21 @@ export default function SignUpPage() {
                             name='age'
                             rules={[
                                 { required: true, message: "Введите ваш возраст" },
-                                { type: 'number', min: 13, message: "Вам должно быть не менее 13 лет" },
-                                { type: 'number', max: 120, message: "Введите корректный возраст" },
                             ]}
                         >
                             <div>
                                 <label className='block text-sm font-medium text-gray-700 mb-2'>Возраст</label>
                                 <Input
                                     size='large'
-                                    type='number'
                                     placeholder='Ваш возраст'
                                     prefix={<Calendar className='w-4 h-4 text-gray-400' />}
                                     className='rounded-lg h-12 hover:border-purple-400 focus:border-purple-600'
                                     disabled={isLoading}
+                                    onChange={(e) => {
+                                        const val = e.target.value.replace(/\D/g, '');
+                                        form.setFieldValue('age', val ? Number(val) : undefined);
+                                    }}
+                                    value={form.getFieldValue('age')}
                                 />
                             </div>
                         </Form.Item>

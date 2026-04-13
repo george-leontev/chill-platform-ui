@@ -125,17 +125,6 @@ const SignInPageInternal = () => {
                             </div>
                         </Form.Item>
 
-                        <div className='flex items-center justify-between mb-6'>
-                            <Form.Item<FieldType> name='remember' valuePropName='checked' noStyle>
-                                <Checkbox className='text-gray-600'>
-                                    <span className='text-sm'>Запомнить меня</span>
-                                </Checkbox>
-                            </Form.Item>
-                            <a href='/forgot-password' className='text-sm text-purple-600 hover:text-purple-700'>
-                                Забыли пароль?
-                            </a>
-                        </div>
-
                         <Form.Item>
                             <button
                                 type='submit'

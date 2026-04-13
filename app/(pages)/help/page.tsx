@@ -2,54 +2,35 @@
 
 import { useState } from "react";
 import { Input } from "antd";
-import { Search, MessageCircle, Book, Mail, Phone, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, Book, Mail, Phone, ChevronDown } from "lucide-react";
+import SupportChat from "./components/support-chat";
 
 const faqs = [
     {
         id: 1,
         question: "How do I create a new post?",
-        answer: "Click on the text area at the top of your feed, type your message, and click the 'Post' button.",
+        answer: "Click on the text area at the top of your feed, type your message, and click the 'Post' button. You can also attach up to 8 images to your post.",
     },
     {
         id: 2,
         question: "How can I delete my post?",
-        answer: "Go to your post, click the three dots menu, and select 'Delete'. This action cannot be undone.",
+        answer: "Go to 'My Posts' page, hover over the post you want to delete, and click the trash icon. This action cannot be undone.",
     },
     {
         id: 3,
         question: "How do I change my profile picture?",
-        answer: "Go to your Profile page, click on the camera icon on your avatar, and upload a new image.",
+        answer: "Go to your Profile page, click 'Edit Profile', then click 'Upload Avatar' to choose a new image from your device.",
     },
     {
         id: 4,
         question: "Can I edit my posts after publishing?",
-        answer: "Yes, click the three dots menu on your post and select 'Edit'. You can edit posts within 24 hours of posting.",
+        answer: "Yes! Go to 'My Posts' page, hover over the post, click the pencil icon, edit your content, and click 'Save Changes'.",
     },
     {
         id: 5,
-        question: "How do I report inappropriate content?",
-        answer: "Click the three dots menu on any post and select 'Report'. Our team will review it within 24 hours.",
-    },
-];
-
-const contactMethods = [
-    {
-        icon: MessageCircle,
-        title: "Live Chat",
-        description: "Chat with our support team",
-        availability: "Available 24/7",
-    },
-    {
-        icon: Mail,
-        title: "Email Support",
-        description: "support@chillplatform.com",
-        availability: "Response within 24h",
-    },
-    {
-        icon: Phone,
-        title: "Phone Support",
-        description: "+1 (555) 123-4567",
-        availability: "Mon-Fri, 9AM-6PM",
+        question: "How do I send a direct message?",
+        answer: "Navigate to the 'Chats' page from the sidebar. Select an existing conversation or start a new one. Messages are delivered in real-time.",
     },
 ];
 
@@ -57,9 +38,10 @@ export default function HelpPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
-    const filteredFaqs = faqs.filter((faq) =>
-        faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredFaqs = faqs.filter(
+        (faq) =>
+            faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            faq.answer.toLowerCase().includes(searchQuery.toLowerCase()),
     );
 
     return (
@@ -86,24 +68,32 @@ export default function HelpPage() {
                 <div className='mb-8'>
                     <h2 className='text-lg font-semibold text-gray-800 mb-4'>Contact Us</h2>
                     <div className='grid gap-3'>
-                        {contactMethods.map((method, index) => {
-                            const Icon = method.icon;
-                            return (
-                                <div
-                                    key={index}
-                                    className='flex items-center gap-4 p-4 bg-white border border-gray-100 rounded-2xl cursor-pointer hover:bg-gray-50 transition'
-                                >
-                                    <div className='p-3 bg-violet-50 rounded-xl'>
-                                        <Icon size={20} className='text-violet-600' />
-                                    </div>
-                                    <div className='flex-1'>
-                                        <p className='font-medium text-gray-800'>{method.title}</p>
-                                        <p className='text-sm text-gray-500'>{method.description}</p>
-                                    </div>
-                                    <span className='text-xs text-gray-400'>{method.availability}</span>
-                                </div>
-                            );
-                        })}
+                        {/* Email Support */}
+                        <div className='flex items-center gap-4 p-4 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition'>
+                            <div className='p-3 bg-violet-50 rounded-xl'>
+                                <Mail size={20} className='text-violet-600' />
+                            </div>
+                            <div className='flex-1'>
+                                <p className='font-medium text-gray-800'>Email Support</p>
+                                <p className='text-sm text-gray-500'>support@chillplatform.com</p>
+                            </div>
+                            <span className='text-xs text-gray-400'>Response within 24h</span>
+                        </div>
+
+                        {/* Phone Support */}
+                        <div className='flex items-center gap-4 p-4 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition'>
+                            <div className='p-3 bg-violet-50 rounded-xl'>
+                                <Phone size={20} className='text-violet-600' />
+                            </div>
+                            <div className='flex-1'>
+                                <p className='font-medium text-gray-800'>Phone Support</p>
+                                <p className='text-sm text-gray-500'>+1 (555) 123-4567</p>
+                            </div>
+                            <span className='text-xs text-gray-400'>Mon-Fri, 9AM-6PM</span>
+                        </div>
+
+                        {/* Live Chat — Component */}
+                        <SupportChat />
                     </div>
                 </div>
 
@@ -118,28 +108,47 @@ export default function HelpPage() {
                             </div>
                         ) : (
                             filteredFaqs.map((faq) => (
-                                <div
+                                <motion.div
                                     key={faq.id}
                                     className='bg-white border border-gray-100 rounded-2xl overflow-hidden'
+                                    initial={false}
                                 >
                                     <button
-                                        onClick={() => setExpandedFaq(expandedFaq === faq.id ? null : faq.id)}
+                                        onClick={() =>
+                                            setExpandedFaq(expandedFaq === faq.id ? null : faq.id)
+                                        }
                                         className='w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition'
                                     >
-                                        <span className='font-medium text-gray-800'>{faq.question}</span>
-                                        <ChevronRight
-                                            size={20}
-                                            className={`text-gray-400 transition-transform ${
-                                                expandedFaq === faq.id ? "rotate-90" : ""
-                                            }`}
-                                        />
+                                        <span className='font-medium text-gray-800 pr-4'>{faq.question}</span>
+                                        <motion.div
+                                            animate={{ rotate: expandedFaq === faq.id ? 90 : 0 }}
+                                            transition={{ duration: 0.2, ease: "easeInOut" }}
+                                        >
+                                            <ChevronDown size={20} className='text-gray-400 shrink-0' />
+                                        </motion.div>
                                     </button>
-                                    {expandedFaq === faq.id && (
-                                        <div className='px-4 pb-4 text-gray-600 border-t border-gray-100 pt-3'>
-                                            {faq.answer}
-                                        </div>
-                                    )}
-                                </div>
+                                    <AnimatePresence>
+                                        {expandedFaq === faq.id && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: "auto", opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                transition={{ duration: 0.25, ease: "easeInOut" }}
+                                            >
+                                                <div className='px-4 pb-4 text-gray-600 border-t border-gray-100'>
+                                                    <motion.p
+                                                        initial={{ y: -8, opacity: 0 }}
+                                                        animate={{ y: 0, opacity: 1 }}
+                                                        transition={{ duration: 0.2, delay: 0.05 }}
+                                                        className='pt-3 leading-relaxed'
+                                                    >
+                                                        {faq.answer}
+                                                    </motion.p>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </motion.div>
                             ))
                         )}
                     </div>

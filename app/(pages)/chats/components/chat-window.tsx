@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Avatar, Input } from "antd";
-import { ArrowLeft, Send, Smile, Paperclip, Phone, Video } from "lucide-react";
+import { ArrowLeft, Send, Smile, Paperclip } from "lucide-react";
 import ChatMessageBubble from "./chat-message-bubble";
 import EmojiPicker from "@/app/components/emoji-picker";
 import { ConversationModel } from "@/app/models/conversation-model";
@@ -124,14 +124,6 @@ export default function ChatWindow({ selectedChat, messages, currentUserId, onBa
                             )}
                         </div>
                         <p className='text-xs text-gray-500'>{selectedChat.partner.username}</p>
-                    </div>
-                    <div className='flex items-center gap-2'>
-                        <button className='p-2 hover:bg-gray-100 rounded-full transition'>
-                            <Phone size={20} className='text-gray-600' />
-                        </button>
-                        <button className='p-2 hover:bg-gray-100 rounded-full transition'>
-                            <Video size={20} className='text-gray-600' />
-                        </button>
                     </div>
                 </div>
 

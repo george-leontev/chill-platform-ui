@@ -44,7 +44,7 @@ const PostCard = ({ post, initialIsLiked = false }: PostCardProps) => {
     return (
         <div className='bg-white border border-gray-100 rounded-2xl p-5 shadow-sm'>
             <div className='flex gap-3'>
-                <Avatar src={"https://i.pravatar.cc/150?img=8"} />
+                <Avatar src={post.author.avatarUrl || "/chill-guy.png"} size={40} />
 
                 <div className='flex-1'>
                     <div className='flex items-center gap-2'>

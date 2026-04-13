@@ -91,12 +91,18 @@ function AuthProvider(props: AppBaseProviderProps) {
     }, [getUserAuthDataFromStorage, router]);
 
     const signUp = useCallback<SignUpAsyncFunc>(async (signUp: SignUpModel) => {
+        let userAuthData = null;
         try {
             const response = await axios.post(`${routes.host}${routes.signUp}`, signUp);
 
             if (response && response.status === HttpConstants.StatusCodes.Ok && response.data) {
-                return;
+                userAuthData = response.data as AuthUserModel;
+                if (userAuthData) {
+                    localStorage.setItem("@userAuthData", JSON.stringify(userAuthData));
+                }
             }
+
+            setUser(userAuthData);
         } catch (error) {
             console.log(`The registration process was failed with error: ${(error as Error).message}`);
             throw error;

@@ -6,6 +6,8 @@ import { ImagePlus, Smile, Loader2, X } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 import EmojiPicker from "./emoji-picker";
+import { useProfile } from "../contexts/profile-context";
+import { useAuth } from "../contexts/app-auth-context";
 
 const { TextArea } = Input;
 
@@ -26,10 +28,14 @@ const fileToBase64 = (file: File): Promise<string> => {
 };
 
 export default function CreatePostForm({ onSubmit, isPosting }: CreatePostFormProps) {
+    const { profile } = useProfile();
+    const { user } = useAuth();
     const [postContent, setPostContent] = useState("");
     const [fileList, setFileList] = useState<UploadFile[]>([]);
     const [previewUrls, setPreviewUrls] = useState<string[]>([]);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+    const displayAvatar = profile?.avatarUrl || undefined;
 
     const handleUploadChange: UploadProps["onChange"] = async ({ fileList: newFileList }) => {
         const filtered = newFileList
@@ -76,7 +82,13 @@ export default function CreatePostForm({ onSubmit, isPosting }: CreatePostFormPr
     return (
         <div className='bg-white border border-gray-100 rounded-2xl shadow-sm p-5'>
             <div className='flex gap-4'>
-                <Avatar size={42} src='https://i.pravatar.cc/100' />
+                <Avatar
+                    size={42}
+                    src={displayAvatar}
+                    className='bg-violet-600'
+                >
+                    {!displayAvatar && (user?.email?.[0]?.toUpperCase() || "U")}
+                </Avatar>
 
                 <div className='flex-1'>
                     <TextArea

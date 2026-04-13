@@ -1,14 +1,16 @@
 "use client";
 
-import { Avatar, Divider } from "antd";
+import { Avatar, Divider, Dropdown } from "antd";
+import type { MenuProps } from "antd";
 import Sider from "antd/es/layout/Sider";
-import { Home, MessageCircle, FileText, Heart, User, LifeBuoy } from "lucide-react";
+import { Home, MessageCircle, FileText, Heart, User, LifeBuoy, LogOut, ChevronUp } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useMessages } from "../contexts/messages-context";
 import { useProfile } from "../contexts/profile-context";
 import { useAuth } from "../contexts/app-auth-context";
 import DrawerNavItem from "./drawer-nav-item";
+import { useState } from "react";
 
 const navItems = [
     { label: "Home", icon: Home, href: "/home" },
@@ -23,10 +25,26 @@ export default function AppDrawer() {
     const pathname = usePathname();
     const { hasUnreadMessages } = useMessages();
     const { profile } = useProfile();
-    const { user } = useAuth();
+    const { user, signOut } = useAuth();
+    const [isSigningOut, setIsSigningOut] = useState(false);
 
     const displayName = profile?.id ? (profile.location || "User") : user?.email?.split("@")[0] || "User";
-    const avatarUrl = profile?.avatarUrl || "https://i.pravatar.cc/100";
+    const avatarUrl = profile?.avatarUrl || "/chill-guy.png";
+
+    const handleSignOut = async () => {
+        setIsSigningOut(true);
+        await signOut();
+        setIsSigningOut(false);
+    };
+
+    const userMenuItems: MenuProps["items"] = [
+        {
+            key: "sign-out",
+            icon: <LogOut size={16} />,
+            label: "Sign Out",
+            danger: true,
+        },
+    ];
 
     return (
         <Sider width={290} theme='light' className='!fixed top-0 left-0 h-screen border-r border-gray-100 z-50'>
@@ -49,15 +67,31 @@ export default function AppDrawer() {
                 </div>
 
                 {/* PROFILE */}
-                <div className='border-t border-gray-100 p-4 bg-violet-50/40 shrink-0'>
-                    <div className='flex items-center gap-3'>
-                        <Avatar size={44} src={avatarUrl} className='ring-2 ring-violet-500' />
+                <div className='border-t border-gray-100 bg-violet-50/40 shrink-0'>
+                    <Dropdown
+                        menu={{
+                            items: userMenuItems,
+                            onClick: handleSignOut,
+                        }}
+                        placement='topLeft'
+                        trigger={["click"]}
+                    >
+                        <button
+                            className='w-full flex items-center gap-3 p-4 hover:bg-violet-100/50 transition cursor-pointer group'
+                            disabled={isSigningOut}
+                        >
+                            <Avatar size={44} src={avatarUrl} className='ring-2 ring-violet-500' />
 
-                        <div className='flex flex-col leading-tight'>
-                            <span className='font-semibold text-gray-800'>{displayName}</span>
-                            <span className='text-xs text-gray-500'>@{user?.email?.split("@")[0] || "user"}</span>
-                        </div>
-                    </div>
+                            <div className='flex-1 flex flex-col leading-tight text-left'>
+                                <span className='font-semibold text-gray-800 truncate'>{displayName}</span>
+                                <span className='text-xs text-gray-500 truncate'>
+                                    @{user?.email?.split("@")[0] || "user"}
+                                </span>
+                            </div>
+
+                            <ChevronUp size={16} className='text-gray-400 group-hover:text-gray-600 transition' />
+                        </button>
+                    </Dropdown>
                 </div>
             </div>
         </Sider>
